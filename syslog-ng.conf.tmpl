@@ -1,0 +1,23 @@
+@version: 3.8
+@include "scl.conf"
+
+source s_loggly {
+    system();
+    internal();
+};
+
+template LogglyFormat {
+    template("<${PRI}>1 ${ISODATE} ${HOST} ${PROGRAM} ${PID} ${MSGID} [LOGGLY_AUTH_TOKEN@41058 LOGGLY_TAG ] $MSG\n");
+    template_escape(no);
+};
+
+destination d_loggly {
+    tcp("logs-01.loggly.com" port(6514)
+    tls(peer-verify(required-untrusted) ca_dir('/opt/syslog-ng/keys/ca.d/'))
+    template(LogglyFormat));
+};
+
+log {
+    source(s_loggly);
+    destination(d_loggly);
+};
